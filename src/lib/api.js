@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+const API_BASE = "/api";
 
 async function http(path, options = {}) {
   if (!API_BASE) {
@@ -8,15 +8,16 @@ async function http(path, options = {}) {
   }
 
   let res;
-  try {
-    res = await fetch(`${API_BASE}${path}`, {
-      headers: { "Content-Type": "application/json" },
-      ...options
-    });
-  } catch (err) {
-    // 🔴 QUESTO è il fix mobile
-    throw new Error("Connessione al backend fallita");
-  }
+    try {
+      res = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers: {
+          ...(options.body ? { "Content-Type": "application/json" } : {})
+        }
+      });
+    } catch (err) {
+      throw new Error("Connessione al backend fallita");
+    }
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
