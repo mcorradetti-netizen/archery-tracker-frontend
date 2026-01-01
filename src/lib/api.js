@@ -29,7 +29,7 @@ async function http(path, options = {}) {
 }
 
 async function deleteSession(id) {
-  return http(`/api/sessions/${id}`, { method: "DELETE" });
+  return http(`/sessions/${id}`, { method: "DELETE" });
 }
 
 export const api = {
