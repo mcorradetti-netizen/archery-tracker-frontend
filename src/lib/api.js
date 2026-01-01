@@ -1,0 +1,49 @@
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
+async function http(path, options = {}) {
+  if (!API_BASE) {
+    throw new Error(
+      "VITE_API_BASE_URL non è definita. Controlla le Environment Variables."
+    );
+  }
+
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      headers: { "Content-Type": "application/json" },
+      ...options
+    });
+  } catch (err) {
+    // 🔴 QUESTO è il fix mobile
+    throw new Error("Connessione al backend fallita");
+  }
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || `HTTP ${res.status}`);
+  }
+
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+async function deleteSession(id) {
+  return http(`/api/sessions/${id}`, { method: "DELETE" });
+}
+
+export const api = {
+  health: () => http("/api/health"),
+  listSessions: () => http("/api/sessions"),
+  createSession: (payload) =>
+    http("/api/sessions", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    }),
+  getSession: (id) => http(`/api/sessions/${id}`),
+  updateSession: (id, payload) =>
+    http(`/api/sessions/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload)
+    }),
+  deleteSession
+};
