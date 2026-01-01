@@ -33,16 +33,16 @@ async function deleteSession(id) {
 }
 
 export const api = {
-  health: () => http("/api/health"),
-  listSessions: () => http("/api/sessions"),
+  health: () => http("/health"),
+  listSessions: () => http("/sessions"),
   createSession: (payload) =>
-    http("/api/sessions", {
+    http("/sessions", {
       method: "POST",
       body: JSON.stringify(payload)
     }),
-  getSession: (id) => http(`/api/sessions/${id}`),
+  getSession: (id) => http(`/sessions/${id}`),
   updateSession: (id, payload) =>
-    http(`/api/sessions/${id}`, {
+    http(`/sessions/${id}`, {
       method: "PUT",
       body: JSON.stringify(payload)
     }),
