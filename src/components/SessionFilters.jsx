@@ -30,16 +30,17 @@ function set(key, value) {
         <label>Periodo</label>
         <div className="rangeRow">
           <input
-            type="date"
-            value={filters.from}
-            onChange={(e) => set("from", e.target.value)}
-          />
-          <span>→</span>
+          type="date"
+          value={filters.from ?? ""}
+          onChange={(e) => set("from", e.target.value || null)}
+         />
+
           <input
             type="date"
-            value={filters.to}
-            onChange={(e) => set("to", e.target.value)}
+            value={filters.to ?? ""}
+            onChange={(e) => set("to", e.target.value || null)}
           />
+
         </div>
       </div>
 

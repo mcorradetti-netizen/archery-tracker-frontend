@@ -37,6 +37,8 @@ export default function ScoringScreen({ session, onBack, onHome, onSave, onOpenS
   const [showMenu, setShowMenu] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [showCumulativeTarget, setShowCumulativeTarget] = useState(false);
+  const [isPlacingArrow, setIsPlacingArrow] = useState(false);
+
   // 🔴 TRISPOT FLAG
 const isTrispot = local?.targetType === "Trispot";
 
@@ -86,6 +88,11 @@ const isTrispot = local?.targetType === "Trispot";
 
     setLocal(normalized);
 
+    // ✅ SALVATAGGIO INIZIALE SESSIONE (IMPORTANTISSIMO)
+if (!session._id) {
+  onSave(normalized);
+}
+
     // (opzionale ma utile) se apri una sessione, riparti dalla prima volée non completa
     // commenta se non lo vuoi
     // const firstIncomplete = normalized.volleys.findIndex(v => (v.arrows || []).some(a => a == null));
@@ -114,6 +121,9 @@ const isTrispot = local?.targetType === "Trispot";
 
   const currentVolley =
     local?.volleys?.[cursor.volley] || { arrows: [null, null, null], hits: [null, null, null], total: 0 };
+
+    const isVolleyComplete =
+  (currentVolley?.arrows || []).filter(a => a != null).length === 3;
 
   /* ======================
      AUTO SAVE (IMPORTANT)
@@ -258,16 +268,17 @@ if (showCumulativeTarget && !isTrispot) {
     if (nextArrow < 3) {
       setCursor({ volley: vIdx, arrow: nextArrow });
     } else {
-      const nextVolley = clamp(vIdx + 1, 0, 19);
-      setCursor({ volley: nextVolley, arrow: 0 });
-    }
+  // ⛔ NON avanzare automaticamente
+  setCursor({ volley: vIdx, arrow: 2 }); // resto sull'ultima freccia
+}
 
     setLocal(next);
   }
 
   function onHit({ score, xNorm, yNorm, isX }) {
-    setArrow(score, { xNorm, yNorm, isX });
-  }
+  setArrow(score, { xNorm, yNorm, isX });
+  setIsPlacingArrow(false); // ✅ dopo un inserimento torno in modalità sicura
+}
 
   function quick(score, isX = false) {
     setArrow(score, isX ? { isX: true } : null);
@@ -384,10 +395,74 @@ if (showCumulativeTarget && !isTrispot) {
       {/* TARGET */}
       <SvgTargetInteractive
         mode={local.targetType === "Trispot" ? "trispot" : "single"}
-        onHit={onHit}
+        onHit={
+              isPlacingArrow ||
+              currentVolley.arrows[cursor.arrow] != null
+                ? onHit
+                : null
+            } // ✅ tap attivo solo quando armato
         activeIndex={cursor.arrow}
         hits={currentVolley.hits || []}
       />
+
+      <div
+  className="card"
+  style={{
+    marginTop: 10,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 10
+  }}
+>
+  {/* 🎯 INSERISCI FRECCIA */}
+  <button
+    className="primary"
+    type="button"
+    onClick={() => setIsPlacingArrow(true)}
+    disabled={
+      isPlacingArrow ||
+      (currentVolley?.arrows || []).filter(a => a != null).length >= 3
+    }
+    style={{
+      padding: "8px 14px",
+      fontSize: 15,
+      minWidth: 180
+    }}
+  >
+    🎯 Inserisci freccia
+  </button>
+
+  {/* ✔ CONFERMA VOLÉE */}
+  {isVolleyComplete && (
+    <button
+      className="primary"
+      type="button"
+      onClick={() => {
+        const nextVolley = clamp(cursor.volley + 1, 0, 19);
+        setCursor({ volley: nextVolley, arrow: 0 });
+      }}
+      style={{
+        padding: "8px 14px",
+        fontSize: 15,
+        minWidth: 180
+      }}
+    >
+      ✔ Conferma volée
+    </button>
+  )}
+
+  <div className="smallMuted" style={{ textAlign: "center" }}>
+    Usa pinch/zoom senza inserimenti involontari. Tocca “Inserisci freccia” prima
+    di piazzare la prossima.
+  </div>
+</div>
+
+<div className="smallMuted" style={{ marginTop: 6 }}>
+  Usa pinch/zoom senza inserimenti involontari. Tocca “Inserisci freccia” prima di piazzare la prossima.
+</div>
+
+
 
       {/* QUICK INPUT */}
       <div className="card">

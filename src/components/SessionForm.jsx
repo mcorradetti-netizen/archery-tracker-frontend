@@ -15,6 +15,7 @@ export default function SessionForm({ onCreate, initialData = null }) {
   const [targetType, setTargetType] = useState(initialData?.targetType || "Trispot");
   const [environment, setEnvironment] = useState(initialData?.environment || "Indoor");
   const [distance, setDistance] = useState(initialData?.distance || 18);
+  const [isPlacingArrow, setIsPlacingArrow] = useState(false);
 
   function submit(e) {
     e.preventDefault();

@@ -1,5 +1,7 @@
 import React from "react";
 import SessionFilters from "./SessionFilters";
+import { exportSessionsToExcel } from "../utils/exportExcel";
+import { exportChartPdf } from "../utils/exportChartPdf";
 
 const DEFAULT_FILTERS = {
   from: null,
@@ -105,6 +107,51 @@ const filteredSessions = sessions.filter((s) => {
         onChange={setFilters}
         onReset={() => setFilters(DEFAULT_FILTERS)}
       />
+
+      {filteredSessions.length > 0 && (
+        <div
+          className="card"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: 16
+          }}
+        >
+          <button
+            className="primary"
+            onClick={async () => {
+            try {
+              await exportSessionsToExcel(filteredSessions, filters);
+            } catch (err) {
+              console.error(err);
+              alert("Export failed: " + (err?.message || err));
+            }
+          }}
+            style={{
+              padding: "8px 16px",
+              fontSize: 14
+            }}
+          >
+            ⬇️ Export Excel (filtri attivi)
+          </button>
+
+          <button
+          className="primary"
+          style={{ marginLeft: 12 }}
+          onClick={async () => {
+            try {
+              await exportChartPdf(filteredSessions, filters);
+            } catch (err) {
+              console.error(err);
+              alert("PDF export failed. See console for details.");
+            }
+          }}
+        >
+          📈 Export PDF (Performance Chart)
+        </button>
+
+        </div>
+      )}
 
       {sessions.length === 0 ? (
         <div className="card">

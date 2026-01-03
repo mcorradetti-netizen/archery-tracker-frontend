@@ -47,6 +47,7 @@ function SingleTarget({ onHit, minScore = 1, hits = [], readOnly = false, points
 
   function handlePointerDown(evt, score) {
     if (readOnly) return;
+    if (!onHit) return; // ✅ se non armato, non inserire nulla
 
     evt.preventDefault();
     evt.stopPropagation();
